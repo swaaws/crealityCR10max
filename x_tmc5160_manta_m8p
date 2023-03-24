@@ -1,4 +1,8 @@
 #TMC5160 on X with S42C Stepper Motor from S42C CLosed Loop Stepper Bundle
+# 12V
+# 3,8R 
+# Internal VCC -> VM
+
 
 [mcu]
 serial: /dev/serial/by-id/usb-Klipper_stm32g0b1xx_1C0017000F504B4633373520-if00
