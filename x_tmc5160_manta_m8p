@@ -1,11 +1,19 @@
-#TMC5160 on X with S42C Stepper Motor from S42C CLosed Loop Stepper Bundle
-# 12V
-# 3,8R 
-# Internal VCC -> VM
+# This file contains common pin mappings for the BIGTREETECH Manta M8P
+# To use this config, the firmware should be compiled for the
+# STM32G0B1 with no "8KiB bootloader" and USB communication.
 
-
+# See docs/Config_Reference.md for a description of parameters.
 [mcu]
-serial: /dev/serial/by-id/usb-Klipper_stm32g0b1xx_1C0017000F504B4633373520-if00
+#serial: /dev/serial/by-id/usb-Klipper_stm32g0b1xx_260019000F504B4633373520-if00
+#serial: /dev/serial/by-id/usb-Klipper_stm32g0b1xx_1C0017000F504B4633373520-if00
+#serial: /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0
+
+[force_move]
+enable_force_move: True
+
+[gcode_macro UNLOCK_MOTORS]
+gcode:
+  SET_KINEMATIC_POSITION X=0 Y=0 Z=0
 
 [printer]
 kinematics: cartesian
@@ -15,25 +23,202 @@ max_z_velocity: 5
 max_z_accel: 100
 
 
+########################################
+# TMC5160 configuration
+########################################
 
-[tmc5160 stepper_x]
-cs_pin: PC10
-diag1_pin: ^!PF3
+[tmc5160 stepper_y]
+cs_pin: PF13
+diag1_pin: ^!PF4
 spi_bus: spi1
 interpolate: False 
-run_current: 0.8
-sense_resistor: 0.075
-driver_SGT: 1
-stealthchop_threshold: 1
+run_current: 0.8               # TODO
+sense_resistor: 0.075          # TODO
+driver_SGT: 2                  # TODO
+stealthchop_threshold: 9999    # TODO
 
+
+########################################
+# TMC2209 configuration
+########################################
+
+[tmc2209 stepper_z]
+uart_pin: PF9
+run_current: 0.8                # TODO
+stealthchop_threshold: 999999   # TODO
+
+[tmc2209 stepper_z1]
+uart_pin: PD4
+run_current: 0.8                # TODO
+stealthchop_threshold: 999999   # TODO
+
+[tmc2209 extruder]
+uart_pin: PD0
+run_current: 0.800
+stealthchop_threshold: 999999
+
+
+########################################
+# Axis configuration
+########################################
 
 [stepper_x]
 step_pin: PE2
 dir_pin: PB4
 enable_pin: !PC11
-microsteps: 16
-rotation_distance: 40
-endstop_pin: tmc5160_stepper_x:virtual_endstop
+microsteps: 16                 # TODO
+rotation_distance: 40          # TODO
+endstop_pin: ^!PF3
 position_endstop: 0
 position_max: 235
 homing_speed: 50
+
+[stepper_y]
+step_pin: PF12
+dir_pin: PF11
+enable_pin: !PB3
+microsteps: 16                 #TODO
+rotation_distance: 40          #TODO
+endstop_pin: tmc5160_stepper_y:virtual_endstop
+position_endstop: 0
+position_max: 450
+homing_speed: 50               #TODO
+
+[stepper_z]
+step_pin: PD7
+dir_pin: !PD6
+enable_pin: !PF10
+microsteps: 16           # TODO
+rotation_distance: 8     # TODO
+endstop_pin: probe:z_virtual_endstop  
+position_max: 470
+position_min: -5.0
+homing_speed: 8
+second_homing_speed: 3
+homing_retract_dist: 3
+
+[stepper_z1]
+step_pin: PD3
+dir_pin: PD2
+enable_pin: PD5
+microsteps: 16           # TODO
+rotation_distance: 8     # TODO
+
+[extruder]
+step_pin: PC9
+dir_pin: PC8
+enable_pin: !PD1
+min_temp: 0
+max_temp: 280
+heater_pin: PE3
+microsteps: 16
+rotation_distance: 23.3
+# 33.683
+nozzle_diameter: 1.000
+filament_diameter: 1.750
+sensor_type: EPCOS 100K B57560G104F
+sensor_pin: PA1
+min_temp: 0
+max_temp: 280
+control: pid
+pid_Kp: 22.57
+pid_Ki: 1.72
+pid_Kd: 73.96
+
+[safe_z_home]
+home_xy_position: 225, 225
+speed: 100
+z_hop: 10
+z_hop_speed: 5
+ 
+[filament_switch_sensor material_0]
+pause_on_runout: True
+runout_gcode:
+    SAVE_GCODE_STATE NAME=PAUSE_state
+    BASE_PAUSE
+    G91
+    G1 E-5 F2100
+    G90
+    G1 X0 Y0 F6000
+switch_pin: PC5
+
+[bltouch]                             # enable for BLTouch - fast-mode
+sensor_pin: ^PB2
+control_pin: PB1
+pin_up_reports_not_triggered: True
+pin_up_touch_mode_reports_triggered: True
+probe_with_touch_mode: True
+stow_on_each_sample: false
+x_offset: -38                         # modify as needed for bltouch location
+y_offset: -2                          # modify as needed for bltouch location
+z_offset: 2
+speed: 10
+samples: 2
+sample_retract_dist: 5.0              # Can be set lower, example 2.5 depending on height of bltouch from bed
+lift_speed: 40
+samples_tolerance_retries: 3
+samples: 2
+
+[heater_bed]
+heater_pin: PB7
+sensor_pin: PA0 # TB
+sensor_type: ATC Semitec 104GT-2
+control: watermark
+min_temp: 0
+max_temp: 130
+control: pid
+pid_Kp: 426.68
+pid_Ki: 78.92
+pid_Kd: 576.71
+max_temp: 120
+
+[bed_mesh]
+speed: 100
+horizontal_move_z: 8
+mesh_min: 50, 50
+mesh_max: 400, 400
+probe_count: 5, 5
+
+[fan]
+pin: PE6
+
+[board_pins]
+aliases:
+    # EXP1 header
+    EXP1_1=PE9, EXP1_2=PE10,
+    EXP1_3=PE11, EXP1_4=PE12,
+    EXP1_5=PE13, EXP1_6=PE14,    # Slot in the socket on this side
+    EXP1_7=PE15, EXP1_8=PB10,
+    EXP1_9=<GND>, EXP1_10=<5V>,
+
+    # EXP2 header
+    EXP2_1=PB14, EXP2_2=PB13,
+    EXP2_3=PF7, EXP2_4=PB12,
+    EXP2_5=PE7, EXP2_6=PB11,      # Slot in the socket on this side
+    EXP2_7=PE8, EXP2_8=<RST>,
+    EXP2_9=<GND>, EXP2_10=PC5
+
+[display_status]
+
+[pause_resume]
+
+[screws_tilt_adjust]                      # enable for bed screws
+horizontal_move_z: 5
+screw1: 40,430
+screw1_name: back left
+screw2: 430,430
+screw2_name: back right
+screw3: 40,40
+screw3_name: front left
+screw4: 430,40
+screw4_name: front right
+
+[virtual_sdcard]
+path: ~/printer_data/gcodes
+
+[gcode_macro CANCEL_PRINT]
+description: Cancel the actual running print
+rename_existing: CANCEL_PRINT_BASE
+gcode:
+  TURN_OFF_HEATERS
+  CANCEL_PRINT_BASE
