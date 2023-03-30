@@ -1,0 +1,11 @@
+[heater_bed]
+heater_pin: PB7
+sensor_pin: PA0 # TB
+sensor_type: ATC Semitec 104GT-2
+control: watermark
+min_temp: 0
+max_temp: 130
+control: pid
+pid_Kp: 426.68
+pid_Ki: 78.92
+pid_Kd: 576.71

@@ -1,0 +1,18 @@
+[extruder]
+step_pin: PC9
+dir_pin: PC8
+enable_pin: !PD1
+min_temp: 0
+max_temp: 280
+heater_pin: PE3
+microsteps: 16
+rotation_distance: 23.3
+# 33.683
+nozzle_diameter: 1.000
+filament_diameter: 1.750
+sensor_type: EPCOS 100K B57560G104F
+sensor_pin: PA1
+control: pid
+pid_Kp: 22.57
+pid_Ki: 1.72
+pid_Kd: 73.96
